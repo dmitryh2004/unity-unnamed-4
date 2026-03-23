@@ -5,6 +5,8 @@ using UnityEngine;
 public class EffectManager : MonoBehaviour
 {
     [SerializeField] List<EffectValues> effectValues = new();
+    private List<EffectID> effectIDs = new();
+    public List<EffectID> EffectIDs => effectIDs;
     public static EffectManager Instance = null;
 
     private void Awake()
@@ -16,6 +18,11 @@ public class EffectManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(this);
+
+        foreach(EffectValues ev in effectValues)
+        {
+            effectIDs.Add(ev.effectID);
+        }
     }
     public EffectValues GetEffectValuesByID(EffectID effectID)
     {

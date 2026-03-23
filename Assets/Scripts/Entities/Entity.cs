@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum EntityID
@@ -7,20 +7,26 @@ public enum EntityID
     player = 0,
     testEnemy = 1
 }
-public class Entity : MonoBehaviour, IDamagable, Effectable
+public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 {
     [SerializeField] EntityID entityID;
+    [SerializeField] Rigidbody2D rb;
     EntityValues entityValues = null;
     private float health;
     private float baseMaxHealth;
     private float currentMaxHealth;
+    private float baseSpeed;
     private Dictionary<EffectID, int> effectCount = new();
     private Dictionary<EffectID, float> effectRemainingTime = new();
 
-    #region Реализация Effectable
+    #region Реализация IEffectable
     public void AddEffect(EffectID effectID, int count = 1)
     {
+        int maxCount = EffectManager.Instance.GetEffectValuesByID(effectID).maxCount;
         effectCount[effectID] += count;
+        if (effectCount[effectID] > maxCount)
+            effectCount[effectID] = maxCount;
+        effectRemainingTime[effectID] = EffectManager.Instance.GetEffectValuesByID(effectID).duration;
     }
 
     public int GetEffectCount(EffectID effectID)
@@ -42,6 +48,7 @@ public class Entity : MonoBehaviour, IDamagable, Effectable
     {
         effectCount[effectID] -= count;
         if (effectCount[effectID] < 0) effectCount[effectID] = 0;
+        if (effectCount[effectID] > 0) effectRemainingTime[effectID] = EffectManager.Instance.GetEffectValuesByID(effectID).duration;
     }
 
     public void RemoveAllEffectOfType(EffectID effectID)
@@ -83,6 +90,28 @@ public class Entity : MonoBehaviour, IDamagable, Effectable
     }
     #endregion
 
+    #region Реализация Movable
+    public void Move(Vector2 direction)
+    {
+        rb.linearVelocity = direction.normalized * GetCurrentSpeed();
+    }
+
+    public float GetCurrentSpeed()
+    {
+        float speed = baseSpeed;
+        if (HasEffect(EffectID.Dash))
+        {
+            speed *= EffectManager.Instance.GetEffectValuesByID(EffectID.Dash).GetEffectValue("MovementSpeedModifier") ?? 1f;
+        }
+        return speed;
+    }
+
+    public float GetBaseSpeed()
+    {
+        return baseSpeed;
+    }
+    #endregion
+
     void Awake()
     {
         if (EntityValuesManager.Instance == null)
@@ -101,6 +130,7 @@ public class Entity : MonoBehaviour, IDamagable, Effectable
         baseMaxHealth = entityValues.baseMaxHealth;
         currentMaxHealth = baseMaxHealth;
         health = entityValues.startHealth;
+        baseSpeed = entityValues.baseMovementSpeed;
 
         if (EffectManager.Instance == null)
         {
@@ -113,5 +143,27 @@ public class Entity : MonoBehaviour, IDamagable, Effectable
             effectCount[EffectManager.Instance.GetEffectValuesByIndex(i).effectID] = 0;
             effectRemainingTime[EffectManager.Instance.GetEffectValuesByIndex(i).effectID] = 0f;
         }
+    }
+
+    private void Update()
+    {
+        ProcessEffects();
+    }
+
+    private void ProcessEffects()
+    {
+        foreach (EffectID effectID in EffectManager.Instance.EffectIDs)
+        {
+            if (effectRemainingTime[effectID] > 0f)
+            {
+                effectRemainingTime[effectID] -= Time.deltaTime;
+                if (effectRemainingTime[effectID] <= 0f)
+                {
+                    RemoveEffect(effectID);
+                }
+            }
+        }
+
+        // process effect behaviour
     }
 }

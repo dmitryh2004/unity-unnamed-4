@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface Effectable
+public interface IEffectable
 {
     public void AddEffect(EffectID effectID, int count = 1);
     public void RemoveEffect(EffectID effectID, int count = 1);
