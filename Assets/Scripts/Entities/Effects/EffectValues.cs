@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum EffectID
 {
-    Dash = 0
+    Dash = 1
 }
 
 [System.Serializable]

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be4def730f7e4b24daeaa71446734548, type: 3}
   m_Name: DashEffectValues
   m_EditorClassIdentifier: 
-  effectID: 0
+  effectID: 1
   maxCount: 1
   duration: 0.2
   effectValues:

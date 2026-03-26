@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 918243d8d57c81343935260372285a50, type: 3}
   m_Name: PlayerValues
   m_EditorClassIdentifier: 
-  entityID: 0
+  entityID: 1
   startHealth: 100
   baseMaxHealth: 100
   baseMovementSpeed: 4

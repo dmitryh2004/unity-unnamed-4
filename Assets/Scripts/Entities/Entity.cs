@@ -4,8 +4,8 @@ using UnityEngine;
 
 public enum EntityID
 {
-    player = 0,
-    testEnemy = 1
+    player = 1,
+    testEnemy = 2
 }
 public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 {
@@ -65,6 +65,11 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     #endregion
 
     #region Реализация Damagable
+
+    public bool IsAlive()
+    {
+        return health > 0;
+    }
     public void Heal(float heal)
     {
         health += heal;
