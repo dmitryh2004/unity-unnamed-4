@@ -11,6 +11,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 {
     [SerializeField] EntityID entityID;
     [SerializeField] Rigidbody2D rb;
+	[SerializeField] protected Animator animator;
     EntityValues entityValues = null;
     private float health;
     private float baseMaxHealth;
@@ -20,7 +21,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     private Dictionary<EffectID, float> effectRemainingTime = new();
 
     #region Реализация IEffectable
-    public void AddEffect(EffectID effectID, int count = 1)
+    public virtual void AddEffect(EffectID effectID, int count = 1)
     {
         int maxCount = EffectManager.Instance.GetEffectValuesByID(effectID).maxCount;
         effectCount[effectID] += count;
@@ -44,19 +45,19 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         return GetEffectCount(effectID) > 0;
     }
 
-    public void RemoveEffect(EffectID effectID, int count = 1)
+    public virtual void RemoveEffect(EffectID effectID, int count = 1)
     {
         effectCount[effectID] -= count;
         if (effectCount[effectID] < 0) effectCount[effectID] = 0;
         if (effectCount[effectID] > 0) effectRemainingTime[effectID] = EffectManager.Instance.GetEffectValuesByID(effectID).duration;
     }
 
-    public void RemoveAllEffectOfType(EffectID effectID)
+    public virtual void RemoveAllEffectOfType(EffectID effectID)
     {
         effectCount[effectID] = 0;
     }
 
-    public void RemoveAllEffects()
+    public virtual void RemoveAllEffects()
     {
         foreach(var effect in effectCount.Keys) {
             effectCount[effect] = 0;
@@ -99,6 +100,26 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     public void Move(Vector2 direction)
     {
         rb.linearVelocity = direction.normalized * GetCurrentSpeed();
+		
+		bool moving = direction != Vector2.zero;
+		animator.SetBool("moving", moving);
+		
+		if (moving) {
+			int animDirection = 0;
+			if (direction.x > 0) {
+				if (direction.y > direction.x) animDirection = 1;
+				else if (direction.y < -direction.x) animDirection = 3;
+				else animDirection = 0;
+			}
+			else if (direction.x < 0) {
+				if (direction.y > -direction.x) animDirection = 1;
+				else if (direction.y < direction.x) animDirection = 3;
+				else animDirection = 2;
+			}
+			else animDirection = (direction.y > 0) ? 1 : 3;
+			
+			animator.SetInteger("direction", animDirection);
+		}
     }
 
     public float GetCurrentSpeed()
