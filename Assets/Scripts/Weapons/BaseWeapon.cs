@@ -9,13 +9,13 @@ public class BaseWeapon : MonoBehaviour
     protected float baseEndAttackTime;
     protected float baseDamage;
     protected float baseReloadTime;
-    protected List<string> targetTags;
+    [SerializeField] protected List<string> targetTags;
     [SerializeField] protected Entity owner;
     protected int energyUsage;
-    protected float prepareAttackTimeModifier;
-    protected float endAttackTimeModifier;
-    protected float damageModifier;
-    protected float reloadTimeModifier;
+    protected float prepareAttackTimeModifier = 1f;
+    protected float endAttackTimeModifier = 1f;
+    protected float damageModifier = 1f;
+    protected float reloadTimeModifier = 1f;
     protected bool isReloading = false;
 
     public float BasePrepareAttackTime => basePrepareAttackTime;
@@ -94,14 +94,14 @@ public class BaseWeapon : MonoBehaviour
         isReloading = false;
     }
 
-    private void Awake()
+    private void Start()
     {
         Init();
     }
 
     protected virtual void Init()
     {
-        WeaponValues weaponValues = WeaponValueManager.Instance.GetEntityValuesByID(weaponID);
+        WeaponValues weaponValues = WeaponValueManager.Instance.GetWeaponValuesByID(weaponID);
 
         SetBasePrepareAttackTime(weaponValues.basePrepareAttackTime);
         SetBaseEndAttackTime(weaponValues.baseEndAttackTime);

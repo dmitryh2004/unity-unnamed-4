@@ -36,7 +36,7 @@ public class Enemy : Entity
         aiPath.maxSpeed = IsMoving() ? GetCurrentSpeed() : 0;
         SetDirection(aiPath.desiredVelocity);
 
-        Debug.Log($"{gameObject.name} - direction: {CurrentDirection}");
+        // Debug.Log($"{gameObject.name} - direction: {CurrentDirection}");
 
         UpdateMoveAnimator();
     }
@@ -45,5 +45,13 @@ public class Enemy : Entity
     {
         base.UpdateEntity();
         UpdateSpeed();
+    }
+
+    protected override void OnDeath()
+    {
+        aiPath.canMove = false;
+        aiPath.maxSpeed = 0f;
+        animator.SetTrigger("death");
+        base.OnDeath();
     }
 }

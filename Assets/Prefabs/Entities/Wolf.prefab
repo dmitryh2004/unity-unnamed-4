@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 187065263661379220}
   - component: {fileID: 5870032816940847439}
   - component: {fileID: 5750323596728806139}
+  - component: {fileID: 6975535028166453654}
   m_Layer: 6
   m_Name: WolfGFX
   m_TagString: Untagged
@@ -110,6 +111,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6975535028166453654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6509569335597540181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15bfdacd576b3b14084ea0b63c47c285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sprite: {fileID: -9068928497420556299, guid: 76e688639f32bf0418fe76b1fcaa24c7, type: 3}
+  spritesInRow: 9
+  spritesInColumn: 5
+  spriteRenderer: {fileID: 5870032816940847439}
 --- !u!1 &7117103090959162630
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,7 +144,7 @@ GameObject:
   - component: {fileID: 3791579784952843883}
   m_Layer: 6
   m_Name: Wolf
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -162,8 +179,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityID: 2
   rb: {fileID: -8306395291544248360}
+  collider: {fileID: 3791579784952843883}
+  material: {fileID: 0}
+  spriteRenderer: {fileID: 5870032816940847439}
+  spriteSheet: {fileID: 2800000, guid: 76e688639f32bf0418fe76b1fcaa24c7, type: 3}
+  spritesInRow: 9
+  spritesInColumn: 5
   animator: {fileID: 5750323596728806139}
   moveDirectionsCount: 2
+  decayDelay: 1
+  decayDuration: 2
   weapon: {fileID: 0}
   weaponObject: {fileID: 0}
   weaponDirection: {x: 0, y: 0}

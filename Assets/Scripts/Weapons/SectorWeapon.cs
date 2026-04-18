@@ -53,9 +53,10 @@ public class SectorWeapon : BaseWeapon
     {
         base.Init();
 
-        WeaponValues weaponValues = WeaponValueManager.Instance.GetEntityValuesByID(weaponID);
-        range = weaponValues?.GetWeaponValue("range") ?? 1f;
+        WeaponValues weaponValues = WeaponValueManager.Instance.GetWeaponValuesByID(weaponID);
+        range = weaponValues?.GetWeaponValue("range") ?? 2f;
         angle = weaponValues?.GetWeaponValue("angle") ?? 30f;
+        Debug.Log($"Range: {range}, angle: {angle}");
     }
 
     protected override void Attack()

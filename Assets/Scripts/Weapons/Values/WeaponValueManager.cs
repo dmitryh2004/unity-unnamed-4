@@ -19,7 +19,7 @@ public class WeaponValueManager : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    public WeaponValues GetEntityValuesByID(WeaponID weaponID)
+    public WeaponValues GetWeaponValuesByID(WeaponID weaponID)
     {
         return weaponValues.FirstOrDefault((x) => x.weaponID == weaponID) ?? null;
     }

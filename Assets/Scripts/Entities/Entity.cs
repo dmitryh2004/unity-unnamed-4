@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,14 +17,25 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 {
     [SerializeField] EntityID entityID;
     [SerializeField] Rigidbody2D rb;
+    [SerializeField] Collider2D collider;
+
     [Header("Sprite sheet")]
-	[SerializeField] protected Animator animator;
+    [SerializeField] Material material;
+    [SerializeField] SpriteRenderer spriteRenderer;
+    [SerializeField] Texture2D spriteSheet;
+    [SerializeField] int spritesInRow, spritesInColumn;
+    [SerializeField] protected Animator animator;
     [SerializeField] MoveDirectionsCount moveDirectionsCount;
+
+    [Header("Decay controller")]
+    [SerializeField] float decayDelay = 0.5f;
+    [SerializeField] float decayDuration = 1f;
 
     [Header("Weapon")]
     public BaseWeapon weapon;
     public Transform weaponObject;
     public Vector2 weaponDirection;
+    [SerializeField] float weaponOffsetDistance = 0f;
 
     EntityValues entityValues = null;
     private float health;
@@ -109,6 +121,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
             health = 0;
             OnDeath();
         }
+        Debug.Log($"{gameObject.name} took {damage} damage (health: {health}");
     }
 
     public float GetCurrentHealth() => health;
@@ -132,13 +145,34 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 
     protected virtual void OnDeath()
     {
+        collider.enabled = false;
+        rb.Sleep();
+        SetMoving(false);
+        StartCoroutine(DecayCoroutine(decayDelay, decayDuration));
+    }
 
+    private IEnumerator DecayCoroutine(float delay, float decayTime)
+    {
+        yield return new WaitForSeconds(delay);
+        float decayTimer = 0f;
+        while (decayTimer < decayTime)
+        {
+            decayTimer += Time.deltaTime;
+            float ratio = decayTimer / decayTime;
+
+            material.SetFloat("_decayDegree", ratio);
+            Debug.Log($"{gameObject.name}: decay progress={ratio}, sprite name={spriteRenderer.sprite.name}");
+
+            yield return new WaitForEndOfFrame();
+        }
+        Destroy(gameObject);
     }
     #endregion
 
     #region Реализация Movable
     public void Move(Vector2 direction)
     {
+        if (!IsAlive()) return;
         SetDirection(direction.normalized);
         rb.linearVelocity = this.direction * GetCurrentSpeed();
 		
@@ -149,11 +183,14 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 
     public bool IsMoving() => moving;
 
-    public void SetMoving(bool moving) => this.moving = moving;
+    public void SetMoving(bool moving) 
+    {
+       this.moving = IsAlive() ? moving : false;
+    }
     public Vector2 CurrentDirection => direction;
     public void SetDirection(Vector2 direction)
     {
-        this.direction = direction;
+        this.direction = IsAlive() ? direction : Vector2.zero;
         if (direction != Vector2.zero) facingDirection = direction;
     }
 
@@ -184,7 +221,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
             }
             else animDirection = (moveDirectionsCount == MoveDirectionsCount.Four) ? ((direction.y > 0) ? 1 : 3) : 0;
 
-            Debug.Log($"{gameObject.name}: direction = {direction}");
+            // Debug.Log($"{gameObject.name}: direction = {direction}");
 
             animator.SetInteger("direction", animDirection);
         }
@@ -215,7 +252,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         {
             normalizedDirection = Vector2.right;
         }
-        Vector2 weaponPosition = normalizedDirection * 0.25f;
+        Vector2 weaponPosition = normalizedDirection * weaponOffsetDistance;
         weaponObject.localPosition = weaponPosition;
         weaponObject.localRotation = Quaternion.Euler(0f, 0f, Vector2.SignedAngle(Vector2.right, normalizedDirection));
     }
@@ -235,6 +272,9 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
             Destroy(gameObject);
             return;
         }
+
+        material = spriteRenderer.material;
+
         baseMaxHealth = entityValues.baseMaxHealth;
         currentMaxHealth = baseMaxHealth;
         health = entityValues.startHealth;
