@@ -2,25 +2,46 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum MoveDirectionsCount
+{
+    Two = 2,
+    Four = 4
+}
 public enum EntityID
 {
     player = 1,
-    testEnemy = 2
+    wolf = 2
 }
 public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 {
     [SerializeField] EntityID entityID;
     [SerializeField] Rigidbody2D rb;
+    [Header("Sprite sheet")]
 	[SerializeField] protected Animator animator;
+    [SerializeField] MoveDirectionsCount moveDirectionsCount;
+
+    [Header("Weapon")]
+    public BaseWeapon weapon;
+    public Transform weaponObject;
+    public Vector2 weaponDirection;
+
     EntityValues entityValues = null;
     private float health;
     private float baseMaxHealth;
     private float currentMaxHealth;
+    private float energy;
+    private float baseMaxEnergy;
+    private float currentMaxEnergy;
     private float baseSpeed;
+
+    private bool moving;
+    private Vector2 direction;
+    private Vector2 facingDirection;
+
     private Dictionary<EffectID, int> effectCount = new();
     private Dictionary<EffectID, float> effectRemainingTime = new();
 
-    #region Реализация IEffectable
+    #region Реализация Effectable
     public virtual void AddEffect(EffectID effectID, int count = 1)
     {
         int maxCount = EffectManager.Instance.GetEffectValuesByID(effectID).maxCount;
@@ -90,6 +111,25 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         }
     }
 
+    public float GetCurrentHealth() => health;
+    public float GetCurrentEnergy() => energy;
+    public bool IsEnoughEnergy(float required) => energy >= required;
+    public void UseEnergy(float energy)
+    {
+        if (IsEnoughEnergy(energy))
+        {
+            this.energy -= energy;
+        }
+    }
+    public void AddEnergy(float energy)
+    {
+        this.energy += energy;
+        if (energy > currentMaxEnergy)
+        {
+            energy = currentMaxEnergy;
+        }
+    }
+
     protected virtual void OnDeath()
     {
 
@@ -99,27 +139,55 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     #region Реализация Movable
     public void Move(Vector2 direction)
     {
-        rb.linearVelocity = direction.normalized * GetCurrentSpeed();
+        SetDirection(direction.normalized);
+        rb.linearVelocity = this.direction * GetCurrentSpeed();
 		
-		bool moving = direction != Vector2.zero;
-		animator.SetBool("moving", moving);
-		
-		if (moving) {
-			int animDirection = 0;
-			if (direction.x > 0) {
-				if (direction.y > direction.x) animDirection = 1;
-				else if (direction.y < -direction.x) animDirection = 3;
-				else animDirection = 0;
-			}
-			else if (direction.x < 0) {
-				if (direction.y > -direction.x) animDirection = 1;
-				else if (direction.y < direction.x) animDirection = 3;
-				else animDirection = 2;
-			}
-			else animDirection = (direction.y > 0) ? 1 : 3;
-			
-			animator.SetInteger("direction", animDirection);
-		}
+		moving = this.direction != Vector2.zero;
+
+        UpdateMoveAnimator();
+    }
+
+    public bool IsMoving() => moving;
+
+    public void SetMoving(bool moving) => this.moving = moving;
+    public Vector2 CurrentDirection => direction;
+    public void SetDirection(Vector2 direction)
+    {
+        this.direction = direction;
+        if (direction != Vector2.zero) facingDirection = direction;
+    }
+
+    protected void UpdateMoveAnimator()
+    {
+        animator.SetBool("moving", moving);
+
+        if (moving)
+        {
+            int animDirection = 0;
+            if (direction.x > 0)
+            {
+                animDirection = 0;
+                if (moveDirectionsCount == MoveDirectionsCount.Four)
+                {
+                    if (direction.y > direction.x) animDirection = 1;
+                    else if (direction.y < -direction.x) animDirection = 3;
+                }
+            }
+            else if (direction.x < 0)
+            {
+                animDirection = 2;
+                if (moveDirectionsCount == MoveDirectionsCount.Four)
+                {
+                    if (direction.y > -direction.x) animDirection = 1;
+                    else if (direction.y < direction.x) animDirection = 3;
+                }
+            }
+            else animDirection = (moveDirectionsCount == MoveDirectionsCount.Four) ? ((direction.y > 0) ? 1 : 3) : 0;
+
+            Debug.Log($"{gameObject.name}: direction = {direction}");
+
+            animator.SetInteger("direction", animDirection);
+        }
     }
 
     public float GetCurrentSpeed()
@@ -137,6 +205,20 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         return baseSpeed;
     }
     #endregion
+
+    protected virtual void ChangeWeaponPosition()
+    {
+        if (weaponObject == null) return;
+        weaponDirection = facingDirection;
+        Vector2 normalizedDirection = weaponDirection.normalized;
+        if (normalizedDirection == Vector2.zero)
+        {
+            normalizedDirection = Vector2.right;
+        }
+        Vector2 weaponPosition = normalizedDirection * 0.25f;
+        weaponObject.localPosition = weaponPosition;
+        weaponObject.localRotation = Quaternion.Euler(0f, 0f, Vector2.SignedAngle(Vector2.right, normalizedDirection));
+    }
 
     void Awake()
     {
@@ -156,6 +238,11 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         baseMaxHealth = entityValues.baseMaxHealth;
         currentMaxHealth = baseMaxHealth;
         health = entityValues.startHealth;
+
+        baseMaxEnergy = entityValues.baseMaxEnergy;
+        currentMaxEnergy = baseMaxEnergy;
+        energy = entityValues.startEnergy;
+
         baseSpeed = entityValues.baseMovementSpeed;
 
         if (EffectManager.Instance == null)
@@ -173,7 +260,16 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
 
     private void Update()
     {
-        ProcessEffects();
+        if (IsAlive())
+        {
+            ProcessEffects();
+            UpdateEntity();
+        }
+    }
+
+    protected virtual void UpdateEntity()
+    {
+        ChangeWeaponPosition();
     }
 
     private void ProcessEffects()
@@ -191,5 +287,13 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
         }
 
         // process effect behaviour
+    }
+
+    public void TryAttack()
+    {
+        if (weapon != null)
+        {
+            weapon.LaunchAttack();
+        }
     }
 }

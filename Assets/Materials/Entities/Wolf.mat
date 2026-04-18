@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Decayable
+  m_Name: Wolf
   m_Shader: {fileID: -6465566751694194690, guid: 522d272b347e37944ba38f79c79f998c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: dc9d75c6e23823c428e84abcd8690287, type: 3}
+        m_Texture: {fileID: 2800000, guid: 76e688639f32bf0418fe76b1fcaa24c7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
@@ -59,7 +59,7 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-    - _UVRemap: {r: 0, g: 0.75, b: 0.11111111, a: 0.25}
+    - _UVRemap: {r: 0, g: 0.8, b: 0.11111111, a: 0.2}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &7475458221111256046

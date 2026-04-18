@@ -1,0 +1,71 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public class SectorWeapon : BaseWeapon
+{
+    protected float range;
+    protected float angle;
+
+    private void OnDrawGizmos()
+    {
+        if (!owner) owner = transform.parent.gameObject.GetComponent<Entity>();
+        if (owner)
+        {
+            Vector2 ownerPosition = owner.transform.position;
+            Vector2 leftAngle = Quaternion.Euler(0f, 0f, angle / 2) * owner.weaponDirection.normalized;
+            Vector2 rightAngle = Quaternion.Euler(0f, 0f, -angle / 2) * owner.weaponDirection.normalized;
+            Debug.DrawRay(ownerPosition, leftAngle * range, Color.yellow);
+            Debug.DrawRay(ownerPosition, rightAngle * range, Color.yellow);
+        }
+    }
+    protected List<IDamagable> FindTargetsForAttack(float range = -1f, float angle = -1f)
+    {
+        if (range == -1f) range = this.range;
+        if (angle == -1f) angle = this.angle;
+        List<IDamagable> targets = new List<IDamagable>(); //поиск целей для атаки
+        //Person[] possibleTargets = FindObjectsByType<Person>(FindObjectsSortMode.None);
+
+        List<Collider2D> possibleTargets = Physics2D.OverlapCircleAll(owner.transform.position, range).ToList<Collider2D>();
+
+        foreach (Collider2D candidate in possibleTargets)
+        { // перебор возможных целей
+            IDamagable damagable = candidate.GetComponent<IDamagable>();
+            if (!targetTags.Contains(candidate.gameObject.tag)) continue; //не реагируем на цели, не соответствующие тегу
+
+            Vector2 candidatePosition = candidate.transform.position;
+            Vector2 candidateDirection = candidatePosition - (Vector2)owner.transform.position;
+
+            if (candidateDirection.magnitude <= range)
+            {
+                float candidateAngle = Vector2.Angle(candidateDirection, owner.weaponDirection);
+                if (candidateAngle <= angle / 2)
+                {
+                    targets.Add(damagable);
+                }
+            }
+        }
+
+        return targets;
+    }
+
+    protected override void Init()
+    {
+        base.Init();
+
+        WeaponValues weaponValues = WeaponValueManager.Instance.GetEntityValuesByID(weaponID);
+        range = weaponValues?.GetWeaponValue("range") ?? 1f;
+        angle = weaponValues?.GetWeaponValue("angle") ?? 30f;
+    }
+
+    protected override void Attack()
+    {
+        List<IDamagable> targets = FindTargetsForAttack();
+
+        //нанесение урона всем целям
+        foreach (IDamagable target in targets)
+        {
+            target.TakeDamage(WeaponDamage);
+        }
+    }
+}

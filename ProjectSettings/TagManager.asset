@@ -11,8 +11,8 @@ TagManager:
   - TilesCollideable
   - Water
   - UI
-  - 
-  - 
+  - Entities
+  - Player
   - 
   - 
   - 

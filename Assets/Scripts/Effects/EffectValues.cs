@@ -14,7 +14,7 @@ public class EffectValue
     public float value;
 }
 
-[CreateAssetMenu(fileName = "EffectValues", menuName = "Scriptable Objects/EffectValues")]
+[CreateAssetMenu(fileName = "Effect values", menuName = "Scriptable Objects/Effect Values")]
 public class EffectValues : ScriptableObject
 {
     public EffectID effectID;

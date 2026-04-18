@@ -7,7 +7,9 @@ public class InputManager : MonoBehaviour
     public static InputManager Instance = null;
     public Vector2 Movement { get; private set; }
     private bool dash = false;
+    private bool attack = false;
     public bool Dash => dash && (!(dash = false));
+    public bool Attack => attack && (!(attack = false));
 
     private void Awake()
     {
@@ -28,5 +30,10 @@ public class InputManager : MonoBehaviour
     public void OnDashPressed(InputAction.CallbackContext context)
     {
         dash = true;
+    }
+
+    public void OnAttackPressed(InputAction.CallbackContext context)
+    {
+        attack = true;
     }
 }
