@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponID: 1
   basePrepareAttackTime: 0
-  baseEndAttackTime: 0.2
+  baseEndAttackTime: 1
   baseDamage: 25
-  baseReloadTime: 1
+  baseReloadTime: 0.2
   keyValuePairs:
   - key: range
     value: 2
   - key: angle
-    value: 60
+    value: 90

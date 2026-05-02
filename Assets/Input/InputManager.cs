@@ -8,6 +8,9 @@ public class InputManager : MonoBehaviour
     public Vector2 Movement { get; private set; }
     private bool dash = false;
     private bool attack = false;
+    private bool mouseAim = false;
+
+    public bool MouseAim => mouseAim;
     public bool Dash => dash && (!(dash = false));
     public bool Attack => attack && (!(attack = false));
 
@@ -35,5 +38,17 @@ public class InputManager : MonoBehaviour
     public void OnAttackPressed(InputAction.CallbackContext context)
     {
         attack = true;
+    }
+
+    public void OnAimModeChanged(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            mouseAim = true;
+        }
+        else if (context.canceled)
+        {
+            mouseAim = false;
+        }
     }
 }

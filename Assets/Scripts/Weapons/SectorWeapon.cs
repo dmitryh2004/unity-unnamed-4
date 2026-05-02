@@ -61,6 +61,8 @@ public class SectorWeapon : BaseWeapon
 
     protected override void Attack()
     {
+        base.Attack();
+
         List<IDamagable> targets = FindTargetsForAttack();
 
         //нанесение урона всем целям

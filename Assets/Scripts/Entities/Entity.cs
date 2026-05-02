@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 
 public enum MoveDirectionsCount
@@ -35,7 +36,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     public BaseWeapon weapon;
     public Transform weaponObject;
     public Vector2 weaponDirection;
-    [SerializeField] float weaponOffsetDistance = 0f;
+    [SerializeField] protected float weaponOffsetDistance = 0f;
 
     EntityValues entityValues = null;
     private float health;
@@ -116,7 +117,7 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     public void TakeDamage(float damage)
     {
         health -= damage;
-        if (health < 0)
+        if (health <= 0)
         {
             health = 0;
             OnDeath();
@@ -198,6 +199,8 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
     {
         animator.SetBool("moving", moving);
 
+        //Debug.Log($"{gameObject.name}: moving={moving}, direction={direction}");
+
         if (moving)
         {
             int animDirection = 0;
@@ -253,8 +256,11 @@ public class Entity : MonoBehaviour, IDamagable, IEffectable, IMovable
             normalizedDirection = Vector2.right;
         }
         Vector2 weaponPosition = normalizedDirection * weaponOffsetDistance;
+        float angle = Vector2.SignedAngle(Vector2.right, normalizedDirection);
         weaponObject.localPosition = weaponPosition;
-        weaponObject.localRotation = Quaternion.Euler(0f, 0f, Vector2.SignedAngle(Vector2.right, normalizedDirection));
+        weaponObject.localRotation = Quaternion.Euler(0f, 0f, angle);
+        float scale = (Mathf.Cos(Mathf.Deg2Rad * angle) >= 0) ? 1 : -1;
+        weaponObject.localScale = new Vector2(1f, scale);
     }
 
     void Awake()

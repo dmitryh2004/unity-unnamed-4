@@ -196,7 +196,7 @@ MonoBehaviour:
   weapon: {fileID: 0}
   weaponObject: {fileID: 0}
   weaponDirection: {x: 0, y: 0}
-  weaponOffsetDistance: 0.1
+  weaponOffsetDistance: 0.05
 --- !u!114 &7591325679215203350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -284,7 +284,19 @@ MonoBehaviour:
     m_ActionId: 5d52a183-30cf-474a-990e-7a71041e67be
     m_ActionName: 'Gameplay/Dash[/Keyboard/leftShift]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4187795944691180936}
+        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
+        m_MethodName: OnAimModeChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: b9645197-d4e2-4d54-b2ad-26f7bfd9a7a3
     m_ActionName: 'Gameplay/ChangeAimMode[/Keyboard/leftCtrl]'
   - m_PersistentCalls:

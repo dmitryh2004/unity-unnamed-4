@@ -17,6 +17,13 @@ public class BaseWeapon : MonoBehaviour
     protected float damageModifier = 1f;
     protected float reloadTimeModifier = 1f;
     protected bool isReloading = false;
+    [Header("Animations")]
+    [SerializeField] protected Animator animator;
+    [SerializeField] protected bool hasPrepareAttackAnimation;
+    [SerializeField] protected bool hasEndAttackAnimation;
+    [SerializeField] protected bool hasAttackAnimation;
+    [SerializeField] protected bool hasReloadingAnimation;
+    [SerializeField] protected bool hasReadyAnimation;
 
     public float BasePrepareAttackTime => basePrepareAttackTime;
     public float BaseEndAttackTime => baseEndAttackTime;
@@ -61,37 +68,44 @@ public class BaseWeapon : MonoBehaviour
 
     protected virtual void Attack()
     {
-
+        if (hasAttackAnimation)
+            animator.SetTrigger("attack");
     }
 
     protected virtual bool CheckAttackConditions()
     {
-        return owner.IsEnoughEnergy(energyUsage);
+        return !isReloading && owner.IsEnoughEnergy(energyUsage);
     }
 
     protected virtual void OnPrepareAttackStart()
     {
-
+        if (hasPrepareAttackAnimation)
+            animator.SetTrigger("prepareAttack");
     }
 
     protected virtual void OnPrepareAttackEnd()
     {
-
+        
     }
 
     protected virtual void OnEndAttackStart()
     {
-
+        if (hasEndAttackAnimation)
+            animator.SetTrigger("endAttack");
     }
 
     protected virtual void OnEndAttackEnd()
     {
-
+        
     }
     protected IEnumerator ReloadWeapon(float reloadTime)
     {
+        if (hasReloadingAnimation)
+            animator.SetTrigger("reloading");
         yield return new WaitForSeconds(reloadTime);
         isReloading = false;
+        if (hasReadyAnimation)
+            animator.SetTrigger("ready");
     }
 
     private void Start()
